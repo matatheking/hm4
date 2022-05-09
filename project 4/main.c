@@ -23,7 +23,7 @@ typedef struct Student
 
 //Part A
 void countStudentsAndCourses(const char* fileName, int** coursesPerStudent, int* numberOfStudents);
-int countPipes(const char* lineBuffer, int maxCount, char terminator);
+int countPipes(const char* lineBuffer, int maxCount);
 char*** makeStudentArrayFromFile(const char* fileName, int** coursesPerStudent, int* numberOfStudents);
 void printStudentArray(const char* const* const* students, const int* coursesPerStudent, int numberOfStudents);
 void factorGivenCourse(char** const* students, const int* coursesPerStudent, int numberOfStudents, const char* courseName, int factor);
@@ -55,21 +55,44 @@ int main()
 	/*_CrtDumpMemoryLeaks();*/ //uncomment this block to check for heap memory allocation leaks.
 	// Read https://docs.microsoft.com/en-us/visualstudio/debugger/finding-memory-leaks-using-the-crt-library?view=vs-2019
 
-	char pipes[] = { "a||b||||" };
+	char pipes[] = { "a||b||||" };//chack if countpipes works
 	int maxCount = 8;
 	char c = 't';
-	printf("%d", countPipes(&pipes, maxCount, c)
+	printf("the amount of '|' is %d", countPipes(&pipes, maxCount, c)
 	);
 
+	
+	char name[] = "studentList.txt";
+	countStudentsAndCourses("studentList.txt", &coursesPerStudent, &numberOfStudents);
+	printf("%d", numberOfStudents);
+
+	
 	return 0;
 }
 
 void countStudentsAndCourses(const char* fileName, int** coursesPerStudent, int* numberOfStudents)
 {
-	//add code here
+	char line[1023];
+	int counter = 0;
+	FILE *file = fopen(fileName, "r");
+	if (!file) {
+		puts("cannot open file\n");
+		exit(1);
+	}
+	while (fgets(line,1023,file)!= NULL)
+		counter++;
+	*numberOfStudents = counter;
+	rewind(file);
+	int* array = (int*)malloc(counter * sizeof(int));
+	counter = 0;
+	while (fgets(line, 1023, file) != NULL) {
+		array[counter++] = countPipes(line, 1023);
+	}
+	*coursesPerStudent = array;
+	fclose(file);
 }
 
-int countPipes(const char* lineBuffer, int maxCount, char terminator)
+int countPipes(const char* lineBuffer, int maxCount)
 {
 	int i = 0;
 	int sum_of_pipe = 0;
