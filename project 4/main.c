@@ -40,8 +40,7 @@ int main()
 	int* coursesPerStudent = NULL;
 	int numberOfStudents = 0;
 	
-	/*factorGivenCourse(students, coursesPerStudent, numberOfStudents, "Advanced Topics in C", +5);
-	printStudentArray(students, coursesPerStudent, numberOfStudents);*/
+	
 	//studentsToFile(students, coursesPerStudent, numberOfStudents); //this frees all memory. Part B fails if this line runs. uncomment for testing (and comment out Part B)
 
 	//Part B
@@ -68,7 +67,18 @@ int main()
 		printf("%d  %p\n",coursesPerStudent[i], &coursesPerStudent[i]);
 	}
 	char*** students = makeStudentArrayFromFile("studentList.txt", &coursesPerStudent, &numberOfStudents);
+	
+	/*int i = 0;
+	int j = 0;
+	printf("\n");
+	while (*(*(students+i))!=NULL)
+	{
+		printf("%s", (*(students + i)));
+		i++;
+	}*/
 
+	factorGivenCourse(students, coursesPerStudent, numberOfStudents, "Advanced Topics in C", +5);
+	//printStudentArray(*students, coursesPerStudent, numberOfStudents);
 	
 	return 0;
 }
@@ -142,23 +152,28 @@ char*** makeStudentArrayFromFile(const char* fileName, int** coursesPerStudent, 
 		}
 	}
 	int i = 0,length;
+	int j = 0;
 	while (fgets(line, 1023, file) != NULL)
 	{
+		j = 0;
 		str = strtok(line, pipe_psik);
 		while (str != NULL) {
 			length = strlen(str);
-			*(*(triple_array + i)) = (char*)malloc(length + 1);
-			if (!*(*(triple_array + i))) {
+			triple_array[i][j] = (char*)malloc((length + 1));
+			//*(*(triple_array + i)) = (char*)malloc(length + 1);
+			if (!triple_array[i][j]) {
 				puts("alocation failed");
 				exit(1);
 			}
-			strcpy(*(*(triple_array + i)), str);
-			puts(*(*(triple_array + i)));
+			strcpy(triple_array[i][j],str);
+			puts(triple_array[i][j]);
 			str = strtok(NULL, pipe_psik);
-			
+			j ++;
 		}
-		}
+		i++;
+	}
 	fclose(file);
+	//printStudentArray(triple_array, countStudentsAndCourses, numberOfStudents);
 	return(triple_array);
 }
 	
@@ -166,8 +181,28 @@ char*** makeStudentArrayFromFile(const char* fileName, int** coursesPerStudent, 
 
 void factorGivenCourse(char** const* students, const int* coursesPerStudent, int numberOfStudents, const char* courseName, int factor)
 {
-	//add code here
+	printf("\n");
+	int i = 0, grade;
+	for (int i = 0; i < numberOfStudents; i++)
+	{
+
+		for (int j= 0; j  < * coursesPerStudent; j ++)
+		{
+			char check[1023]; 
+			strcpy(check, students[i][j]);
+			if (strcmp(check,courseName)==0)
+			{
+				grade = atoi(students[i][j+1]);
+				grade += factor;
+				if (grade > 100) grade = 100;
+				if (grade < 0)grade = 0;
+				_itoa(grade, (students[i][j+1]), 10);
+			}
+		}
+	}
+	printStudentArray(students, coursesPerStudent, numberOfStudents);
 }
+
 
 void printStudentArray(const char* const* const* students, const int* coursesPerStudent, int numberOfStudents)
 {
