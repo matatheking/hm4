@@ -68,17 +68,10 @@ int main()
 	}
 	char*** students = makeStudentArrayFromFile("studentList.txt", &coursesPerStudent, &numberOfStudents);
 	
-	/*int i = 0;
-	int j = 0;
-	printf("\n");
-	while (*(*(students+i))!=NULL)
-	{
-		printf("%s", (*(students + i)));
-		i++;
-	}*/
+	
 
 	factorGivenCourse(students, coursesPerStudent, numberOfStudents, "Advanced Topics in C", +5);
-	//printStudentArray(*students, coursesPerStudent, numberOfStudents);
+	studentsToFile(students, coursesPerStudent, numberOfStudents);
 	
 	return 0;
 }
@@ -160,20 +153,17 @@ char*** makeStudentArrayFromFile(const char* fileName, int** coursesPerStudent, 
 		while (str != NULL) {
 			length = strlen(str);
 			triple_array[i][j] = (char*)malloc((length + 1));
-			//*(*(triple_array + i)) = (char*)malloc(length + 1);
 			if (!triple_array[i][j]) {
 				puts("alocation failed");
 				exit(1);
 			}
 			strcpy(triple_array[i][j],str);
-			puts(triple_array[i][j]);
 			str = strtok(NULL, pipe_psik);
 			j ++;
 		}
 		i++;
 	}
 	fclose(file);
-	//printStudentArray(triple_array, countStudentsAndCourses, numberOfStudents);
 	return(triple_array);
 }
 	
@@ -185,8 +175,7 @@ void factorGivenCourse(char** const* students, const int* coursesPerStudent, int
 	int i = 0, grade;
 	for (int i = 0; i < numberOfStudents; i++)
 	{
-
-		for (int j= 0; j  < * coursesPerStudent; j ++)
+		for (int j= 0; j  < *(coursesPerStudent + i) * 2 + 1; j ++)
 		{
 			char check[1023]; 
 			strcpy(check, students[i][j]);
@@ -220,7 +209,26 @@ void printStudentArray(const char* const* const* students, const int* coursesPer
 
 void studentsToFile(char*** students, int* coursesPerStudent, int numberOfStudents)
 {
-	//add code here
+	FILE* file = fopen("studentList.txt", "w");
+	for (int i = 0; i < numberOfStudents; i++)
+	{
+		for (int j = 0; j < *(coursesPerStudent+i)*2+1; j++)
+		{
+			fprintf(file, students[i][j]);
+			free(students[i][j]);
+			if (j%2 == 0)
+				fprintf(file, "|");
+			else
+				fprintf(file, ",");
+
+		}
+		fprintf(file, "\n");
+		free(students[i]);
+	}
+
+	free(coursesPerStudent);
+	free(students);
+	fclose(file);
 }
 
 void writeToBinFile(const char* fileName, Student* students, int numberOfStudents)
