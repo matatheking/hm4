@@ -70,9 +70,11 @@ int main()
 	
 	
 
-	factorGivenCourse(students, coursesPerStudent, numberOfStudents, "Advanced Topics in C", +5);
-	studentsToFile(students, coursesPerStudent, numberOfStudents);
-	
+//	factorGivenCourse(students, coursesPerStudent, numberOfStudents, "Advanced Topics in C", +5);
+//	studentsToFile(students, coursesPerStudent, numberOfStudents);
+	Student* stu = transformStudentArray(students, coursesPerStudent, numberOfStudents);
+	writeToBinFile("students.bin", stu, numberOfStudents);
+	readFromBinFile("students.bin");
 	return 0;
 }
 
@@ -231,17 +233,68 @@ void studentsToFile(char*** students, int* coursesPerStudent, int numberOfStuden
 	fclose(file);
 }
 
-void writeToBinFile(const char* fileName, Student* students, int numberOfStudents)
-{
-	//add code here
+void writeToBinFile(const char* fileName, Student* students, int numberOfStudents){
+	FILE* binfile = fopen(fileName, "wb");
+	if (!binfile) {
+		puts("cannot open file\n"); exit(1);
+	}
+	fwrite(&numberOfStudents, sizeof(int), 1, binfile);
+	for (int i = 0; i < numberOfStudents; i++) {
+		fwrite(&students[i].name, 35,1, binfile);
+		fwrite(&students[i].numberOfCourses, sizeof(int),1, binfile);
+		for (int j = 0; j < students[i].numberOfCourses; j++) {
+			fwrite(&students[i].grades[j].courseName, 35,1, binfile);
+			fwrite(&students[i].grades[j].grade, sizeof(int), 1, binfile);
+		}
+
+	}
+	fclose(binfile);
 }
 
 Student* readFromBinFile(const char* fileName)
 {
-	//add code here
+	FILE* binfile = fopen(fileName, "rb");
+	if (!binfile) {
+		puts("cannot open file\n"); exit(1);
+	}
+	int numofstudents;
+	fread(&numofstudents, sizeof(int), 1, binfile);
+	Student* students = (Student*)malloc(numofstudents * sizeof(Student));
+	if (!students) {
+		puts("allocation failled\n"); exit(1);
+	}
+	for (int i = 0; i < numofstudents; i++) {
+		fread(&(students + i)->name, 35,1, binfile);
+		fread(&(students + i)->numberOfCourses, sizeof(int), 1, binfile);
+		students[i].grades = (StudentCourseGrade*)malloc(students[i].numberOfCourses * sizeof(StudentCourseGrade));
+		if (!students[i].grades) {
+			puts("allocation failled\n"); exit(1);
+		}
+		for (int j = 0; j < students[i].numberOfCourses; j++) {
+			fread(&((students + i)->grades + j)->courseName, 35,1, binfile);
+			fread(&((students + i)->grades + j)->grade, sizeof(int), 1, binfile);
+		}
+	}
+	fclose(binfile);
 }
 
 Student* transformStudentArray(char*** students, const int* coursesPerStudent, int numberOfStudents)
 {
-	//add code here
+	Student* stu = (Student*)malloc(numberOfStudents * sizeof(Student));
+	for (int i = 0; i < numberOfStudents; i++)
+	{
+		strcpy((stu + i)->name, students[i][0]);
+		(stu + i)->numberOfCourses = coursesPerStudent[i];
+		(stu + i)->grades = (StudentCourseGrade*)malloc(coursesPerStudent[i] * sizeof(StudentCourseGrade));
+		for (int j = 1,k=0; j < (coursesPerStudent[i]*2)+1; j++) {
+			if (j % 2 == 1) {
+				strcpy(((stu + i)->grades +k ), students[i][j]);
+			}
+			else {
+				((stu + i)->grades+ k)->grade = atoi(students[i][j]);
+				k++;
+			}
+		}
+	}
+	return stu;
 }
