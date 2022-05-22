@@ -46,7 +46,7 @@ int main()
 	//Part B
 	//Student* transformedStudents = transformStudentArray(students, coursesPerStudent, numberOfStudents);
 	//writeToBinFile("students.bin", transformedStudents, numberOfStudents);
-	Student* testReadStudents = readFromBinFile("students.bin");
+//	Student* testReadStudents = readFromBinFile("students.bin");
 
 	//add code to free all arrays of struct Student
 
@@ -71,17 +71,17 @@ int main()
 	
 
 //	factorGivenCourse(students, coursesPerStudent, numberOfStudents, "Advanced Topics in C", +5);
-//	studentsToFile(students, coursesPerStudent, numberOfStudents);
-	Student* stu = transformStudentArray(students, coursesPerStudent, numberOfStudents);
-	writeToBinFile("students.bin", stu, numberOfStudents);
-	readFromBinFile("students.bin");
+	studentsToFile(students, coursesPerStudent, numberOfStudents);
+	//Student* stu = transformStudentArray(students, coursesPerStudent, numberOfStudents);
+	//writeToBinFile("students.bin", stu, numberOfStudents);
+	//readFromBinFile("students.bin");
 	return 0;
 }
 
 void countStudentsAndCourses(const char* fileName, int** coursesPerStudent, int* numberOfStudents){
-	char line[1023];
+	char line[1023];//stirng array which we will use later to count how many pipes it has.
 	int counter = 0;
-	FILE *file = fopen(fileName, "r");
+	FILE *file = fopen(fileName, "r");//file pointer
 	if (!file) {
 		puts("cannot open file\n");
 		exit(1);
@@ -90,13 +90,13 @@ void countStudentsAndCourses(const char* fileName, int** coursesPerStudent, int*
 		counter++;
 	*numberOfStudents = counter;
 	rewind(file);
-	int* array = (int*)malloc(counter * sizeof(int));
+	int* array = (int*)malloc(counter * sizeof(int));//array that will contain the courses
 	if (!array) {
 		puts("alocation failed\n");
 		exit(1);
 	}
 	counter = 0;
-	while (fgets(line, 1023, file) != NULL) {
+	while (fgets(line, 1023, file) != NULL) {//go over each line of the text file,count how many pipes it has, and promote the courses counter
 		*(array+counter) = countPipes(line, 1023);
 		counter++;
 	}
@@ -106,13 +106,13 @@ void countStudentsAndCourses(const char* fileName, int** coursesPerStudent, int*
 
 int countPipes(const char* lineBuffer, int maxCount)
 {
-	int i = 0;
-	int sum_of_pipe = 0;
+	int i = 0;//loop counter
+	int sum_of_pipe = 0;//pipes counter
 	if (lineBuffer == NULL)
 		return -1;
 	if (maxCount <= 0)
 		return 0;
-	while (lineBuffer[0] != '\0' && i != maxCount)
+	while (lineBuffer[0] != '\0' && i != maxCount)//go over the string and count pipes
 	{
 		if (lineBuffer[0] == '|')
 			sum_of_pipe++;
@@ -124,7 +124,7 @@ int countPipes(const char* lineBuffer, int maxCount)
 
 char*** makeStudentArrayFromFile(const char* fileName, int** coursesPerStudent, int* numberOfStudents)
 {
-	char pipe_psik[3] = "|,";
+	char pipe_psik[3] = "|,";//array that will help us decide to whrere we wanna put the string, the order of the text is : name | course , grade | and ext.
 	char* str;
 	char line[1023];
 	FILE* file = fopen(fileName, "r");
@@ -133,12 +133,12 @@ char*** makeStudentArrayFromFile(const char* fileName, int** coursesPerStudent, 
 		exit(1);
 	}
 	int size = *numberOfStudents;
-	char*** triple_array = (char***)malloc(size * sizeof(char**));
+	char*** triple_array = (char***)malloc(size * sizeof(char**));//triple pointer array
 	if (!triple_array) {
 		puts("alocation failed\n");
 		exit(1);
 	}
-	for (int i = 0; i < size; i++) {
+	for (int i = 0; i < size; i++) {// allocate memory acording to the number of courses.
 		int numofcourse = *(*(coursesPerStudent)+i);
 		*(triple_array+i) = (char**)malloc((numofcourse * 2 + 1)*sizeof(char*));
 		if (!*(triple_array + i)) {
@@ -175,9 +175,9 @@ void factorGivenCourse(char** const* students, const int* coursesPerStudent, int
 {
 	printf("\n");
 	int i = 0, grade;
-	for (int i = 0; i < numberOfStudents; i++)
+	for (int i = 0; i < numberOfStudents; i++)//loop that goes over the student list
 	{
-		for (int j= 0; j  < *(coursesPerStudent + i) * 2 + 1; j ++)
+		for (int j= 0; j  < *(coursesPerStudent + i) * 2 + 1; j ++)//go over the courses of the current student, if it is matching to the factor course, upgrade its grade
 		{
 			char check[1023]; 
 			strcpy(check, students[i][j]);
@@ -211,10 +211,10 @@ void printStudentArray(const char* const* const* students, const int* coursesPer
 
 void studentsToFile(char*** students, int* coursesPerStudent, int numberOfStudents)
 {
-	FILE* file = fopen("studentList.txt", "w");
-	for (int i = 0; i < numberOfStudents; i++)
+	FILE* file = fopen("studentList.txt", "w");//file pointer
+	for (int i = 0; i < numberOfStudents; i++)//goes over the student list
 	{
-		for (int j = 0; j < *(coursesPerStudent+i)*2+1; j++)
+		for (int j = 0; j < *(coursesPerStudent+i)*2+1; j++)//write to the text - if the index % 2 is 0 put |  else put  ,
 		{
 			fprintf(file, students[i][j]);
 			free(students[i][j]);
@@ -234,17 +234,17 @@ void studentsToFile(char*** students, int* coursesPerStudent, int numberOfStuden
 }
 
 void writeToBinFile(const char* fileName, Student* students, int numberOfStudents){
-	FILE* binfile = fopen(fileName, "wb");
+	FILE* binfile = fopen(fileName, "wb");//binary file pointer
 	if (!binfile) {
 		puts("cannot open file\n"); exit(1);
 	}
-	fwrite(&numberOfStudents, sizeof(int), 1, binfile);
-	for (int i = 0; i < numberOfStudents; i++) {
-		fwrite(&students[i].name, 35,1, binfile);
-		fwrite(&students[i].numberOfCourses, sizeof(int),1, binfile);
+	fwrite(&numberOfStudents, sizeof(int), 1, binfile);//write first the number of students
+	for (int i = 0; i < numberOfStudents; i++) {//goes over the student list
+		fwrite(&students[i].name, 35,1, binfile);//writee the name of the student
+		fwrite(&students[i].numberOfCourses, sizeof(int),1, binfile);//number of courses
 		for (int j = 0; j < students[i].numberOfCourses; j++) {
-			fwrite(&students[i].grades[j].courseName, 35,1, binfile);
-			fwrite(&students[i].grades[j].grade, sizeof(int), 1, binfile);
+			fwrite(&students[i].grades[j].courseName, 35,1, binfile);//puts its name
+			fwrite(&students[i].grades[j].grade, sizeof(int), 1, binfile);//puts its grade
 		}
 
 	}
@@ -253,26 +253,26 @@ void writeToBinFile(const char* fileName, Student* students, int numberOfStudent
 
 Student* readFromBinFile(const char* fileName)
 {
-	FILE* binfile = fopen(fileName, "rb");
+	FILE* binfile = fopen(fileName, "rb");//binary file pointer
 	if (!binfile) {
 		puts("cannot open file\n"); exit(1);
 	}
 	int numofstudents;
-	fread(&numofstudents, sizeof(int), 1, binfile);
-	Student* students = (Student*)malloc(numofstudents * sizeof(Student));
+	fread(&numofstudents, sizeof(int), 1, binfile);//copy from the binary text the number of student
+	Student* students = (Student*)malloc(numofstudents * sizeof(Student));//struct array - for each student
 	if (!students) {
 		puts("allocation failled\n"); exit(1);
 	}
 	for (int i = 0; i < numofstudents; i++) {
-		fread(&(students + i)->name, 35,1, binfile);
-		fread(&(students + i)->numberOfCourses, sizeof(int), 1, binfile);
+		fread(&(students + i)->name, 35,1, binfile);//copy the bame of the student
+		fread(&(students + i)->numberOfCourses, sizeof(int), 1, binfile);//copy number of coursrs
 		students[i].grades = (StudentCourseGrade*)malloc(students[i].numberOfCourses * sizeof(StudentCourseGrade));
 		if (!students[i].grades) {
 			puts("allocation failled\n"); exit(1);
 		}
 		for (int j = 0; j < students[i].numberOfCourses; j++) {
-			fread(&((students + i)->grades + j)->courseName, 35,1, binfile);
-			fread(&((students + i)->grades + j)->grade, sizeof(int), 1, binfile);
+			fread(&((students + i)->grades + j)->courseName, 35,1, binfile);//copy course name
+			fread(&((students + i)->grades + j)->grade, sizeof(int), 1, binfile);//copy grade
 		}
 	}
 	fclose(binfile);
@@ -280,13 +280,13 @@ Student* readFromBinFile(const char* fileName)
 
 Student* transformStudentArray(char*** students, const int* coursesPerStudent, int numberOfStudents)
 {
-	Student* stu = (Student*)malloc(numberOfStudents * sizeof(Student));
+	Student* stu = (Student*)malloc(numberOfStudents * sizeof(Student));//struct array  - for each student
 	for (int i = 0; i < numberOfStudents; i++)
 	{
-		strcpy((stu + i)->name, students[i][0]);
-		(stu + i)->numberOfCourses = coursesPerStudent[i];
+		strcpy((stu + i)->name, students[i][0]);//copy name
+		(stu + i)->numberOfCourses = coursesPerStudent[i];//copy the number of courses of the current student
 		(stu + i)->grades = (StudentCourseGrade*)malloc(coursesPerStudent[i] * sizeof(StudentCourseGrade));
-		for (int j = 1,k=0; j < (coursesPerStudent[i]*2)+1; j++) {
+		for (int j = 1,k=0; j < (coursesPerStudent[i]*2)+1; j++) {//i - students counter,k - index for whats inside grade, j - inner lines loop index
 			if (j % 2 == 1) {
 				strcpy(((stu + i)->grades +k ), students[i][j]);
 			}
