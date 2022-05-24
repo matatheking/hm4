@@ -70,11 +70,11 @@ int main()
 	
 	
 
-//	factorGivenCourse(students, coursesPerStudent, numberOfStudents, "Advanced Topics in C", +5);
-	studentsToFile(students, coursesPerStudent, numberOfStudents);
-	//Student* stu = transformStudentArray(students, coursesPerStudent, numberOfStudents);
-	//writeToBinFile("students.bin", stu, numberOfStudents);
-	//readFromBinFile("students.bin");
+	factorGivenCourse(students, coursesPerStudent, numberOfStudents, "Advanced Topics in C", +5);
+	//studentsToFile(students, coursesPerStudent, numberOfStudents);
+	Student* stu = transformStudentArray(students, coursesPerStudent, numberOfStudents);
+	writeToBinFile("students.bin", stu, numberOfStudents);
+	readFromBinFile("students.bin");
 	return 0;
 }
 
@@ -242,10 +242,14 @@ void writeToBinFile(const char* fileName, Student* students, int numberOfStudent
 	for (int i = 0; i < numberOfStudents; i++) {//goes over the student list
 		fwrite(&students[i].name, 35,1, binfile);//writee the name of the student
 		fwrite(&students[i].numberOfCourses, sizeof(int),1, binfile);//number of courses
-		for (int j = 0; j < students[i].numberOfCourses; j++) {
-			fwrite(&students[i].grades[j].courseName, 35,1, binfile);//puts its name
-			fwrite(&students[i].grades[j].grade, sizeof(int), 1, binfile);//puts its grade
-		}
+		fwrite(&students->grades, 39,students[i].numberOfCourses, binfile);//puts its name
+		
+		
+
+		//for (int j = 0; j < students[i].numberOfCourses; j++) {
+		//	fwrite(&students[i].grades[j].courseName, 35,1, binfile);//puts its name
+		//	fwrite(&students[i].grades[j].grade, sizeof(int), 1, binfile);//puts its grade
+		//}
 
 	}
 	fclose(binfile);
@@ -266,14 +270,19 @@ Student* readFromBinFile(const char* fileName)
 	for (int i = 0; i < numofstudents; i++) {
 		fread(&(students + i)->name, 35,1, binfile);//copy the bame of the student
 		fread(&(students + i)->numberOfCourses, sizeof(int), 1, binfile);//copy number of coursrs
+
 		students[i].grades = (StudentCourseGrade*)malloc(students[i].numberOfCourses * sizeof(StudentCourseGrade));
+		
 		if (!students[i].grades) {
 			puts("allocation failled\n"); exit(1);
 		}
-		for (int j = 0; j < students[i].numberOfCourses; j++) {
-			fread(&((students + i)->grades + j)->courseName, 35,1, binfile);//copy course name
-			fread(&((students + i)->grades + j)->grade, sizeof(int), 1, binfile);//copy grade
-		}
+		fread(&(students + i)->grades, 39, students[i].numberOfCourses, binfile);//copy number of coursrs
+
+
+		//for (int j = 0; j < students[i].numberOfCourses; j++) {
+		//	fread(&((students + i)->grades + j)->courseName, 35,1, binfile);//copy course name
+		//	fread(&((students + i)->grades + j)->grade, sizeof(int), 1, binfile);//copy grade
+		//}
 	}
 	fclose(binfile);
 }
